@@ -59,31 +59,8 @@ var Pokemon = require('./models/Pokemon');
 var PokemonCollection = require('./collections/PokemonCollection');
 var PokemonListView = require('./views/PokemonListView');
 
-var pokemons = new PokemonCollection([/*
-                                      {
-                                      id: 123,
-                                      name: 'Blaziken'
-                                      }, {
-                                      id: 72,
-                                      name: 'Bulbasaur'
-                                      }, {
-                                      id: 2,
-                                      name: 'Pikachu'
-                                      }, {
-                                      id: 2,
-                                      name: 'Pikachu'
-                                      }, {
-                                      id: 2,
-                                      name: 'Pikachu'
-                                      }, {
-                                      id: 2,
-                                      name: 'Pikachu'
-                                      }, {
-                                      id: 2,
-                                      name: 'Pikachu'
-                                      }
-                                      */], {
-  nextUrl: 'http://pokeapi.co/api/v2/pokemon/'
+var pokemons = new PokemonCollection([], {
+  nextUrl: 'https://pokeapi.co/api/v2/pokemon/'
 });
 
 var view = new PokemonListView({
