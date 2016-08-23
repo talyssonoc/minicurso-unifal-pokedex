@@ -11,7 +11,6 @@ body {
 
 .pokedex {
   background: red;
-  border-top: 0;
   display: flex;
   flex-flow: column;
   color: white;
@@ -21,8 +20,9 @@ body {
   @media (min-width: 480px) {
     .pokedex {
       border: 3px solid #ff4d4d;
+      border-top: 0;
       border-radius: 5px;
-      box-shadow: 0px 25px 0 red;
+      box-shadow: 0px 10px 0 #bb2929;
       height: 450px;
       margin: 0 auto;
       width: 300px; } }
@@ -37,7 +37,7 @@ body {
 
 .pokemon-list {
   background: #61C93E;
-  box-shadow: 1px 1px 0 #cc0000 inset;
+  box-shadow: 1px 1px 0 #bb2929 inset;
   flex: 1;
   height: 300px;
   overflow: auto;
