@@ -68,8 +68,7 @@ var view = new PokemonListView({
   element: $('#pokedex')
 });
 
-view.render();
-view.loadMore();
+view.render().loadMore();
 
 },{"./collections/PokemonCollection":1,"./models/Pokemon":6,"./views/PokemonListView":7,"jquery":9}],3:[function(require,module,exports){
 "use strict";
@@ -183,6 +182,9 @@ var PokemonListView = function (_View) {
     var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(PokemonListView).call(this, attrs));
 
     _this.pokemons = attrs.pokemons;
+
+    _this.$pokemonsList = $('<div class="pokemon-list"/>');
+    _this.$loadMore = $('<button class="load-more">Load more</button>');
     return _this;
   }
 
@@ -191,12 +193,9 @@ var PokemonListView = function (_View) {
     value: function render() {
       var _this2 = this;
 
-      this.$pokemonsList = $('<div class="pokemon-list"/>');
       this.$element.append(this.$pokemonsList);
-
       this.appendPokemonList(this.pokemons);
 
-      this.$loadMore = $('<button class="load-more">Load more</button>');
       this.$loadMore.on('click', function () {
         return _this2.loadMore();
       });
@@ -222,11 +221,8 @@ var PokemonListView = function (_View) {
     value: function appendPokemonList(list) {
       var _this4 = this;
 
-      var pokemonViews = list.items.map(function (pokemon) {
-        return new PokemonView({ pokemon: pokemon });
-      });
-
-      pokemonViews.forEach(function (pokemonView) {
+      list.items.forEach(function (pokemon) {
+        var pokemonView = new PokemonView({ pokemon: pokemon });
         _this4.$pokemonsList.append(pokemonView.render().$element);
       });
     }
