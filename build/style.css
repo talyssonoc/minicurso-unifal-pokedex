@@ -28,12 +28,23 @@ body {
       width: 300px; } }
 
 .pokemon {
-  color: white;
-  font-family: 'Press Start 2P', cursive;
-  font-size: 14px;
+  height: 74px;
+  overflow: auto;
   padding: 2px; }
   .pokemon:hover {
     background-color: #71cf52; }
+  .pokemon .pokemon-name {
+    color: white;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 14px;
+    float: right;
+    margin-top: 25px;
+    text-align: center;
+    width: 70%; }
+  .pokemon .pokemon-image {
+    float: left;
+    max-height: 70px;
+    max-width: 30%; }
 
 .pokemon-list {
   background: #61C93E;

@@ -151,6 +151,11 @@ var Pokemon = function (_Model) {
       var name = this.name;
       return '' + name.charAt(0).toUpperCase() + name.slice(1);
     }
+  }, {
+    key: 'getImage',
+    value: function getImage() {
+      return 'https://img.pokemondb.net/sprites/black-white/normal/' + this.name + '.png';
+    }
   }]);
 
   return Pokemon;
@@ -261,7 +266,7 @@ var PokemonView = function (_View) {
   _createClass(PokemonView, [{
     key: 'render',
     value: function render() {
-      var html = '<div class="pokemon">' + this.pokemon.getName() + '</div>';
+      var html = '\n      <div class="pokemon">\n        <img class="pokemon-image" src="' + this.pokemon.getImage() + '"/>\n        <div class="pokemon-name">\n          ' + this.pokemon.getName() + '\n        </div>\n      </div>';
 
       this.$element.html(html);
 
