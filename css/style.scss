@@ -1,0 +1,13 @@
+@import 'variables';
+@import 'pokedex';
+@import 'pokemonList';
+@import 'pokemon';
+@import 'loadMore';
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}

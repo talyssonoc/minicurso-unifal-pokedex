@@ -1,0 +1,9 @@
+.pokemon-list {
+  height: 100%;
+  width: 100%;
+  background-color: $screen-color;
+  border: 1px solid $pokedex-shadow-color;
+  color: $white-color;
+  padding: 10px;
+  overflow: auto;
+}

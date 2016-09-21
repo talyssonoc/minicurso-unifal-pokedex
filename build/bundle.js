@@ -1,285 +1,212 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 
+var $ = require('jquery');
+
+var pokemons = require('./pokemons');
+var PokemonListView = require('./views/PokemonListView');
+
+var $pokedex = $('.pokedex');
+
+var pokemonListView = new PokemonListView({
+  pokemons: pokemons
+});
+
+var $loadMore = $('<button/>');
+$loadMore.text('Load more');
+$loadMore.addClass('load-more');
+
+$loadMore.on('click', function () {
+  $loadMore.attr('disabled', true);
+  pokemonListView.loadNextPage().then(function () {
+    $loadMore.attr('disabled', false);
+  });
+});
+
+pokemons.fetchNext().then(function () {
+  pokemonListView.render();
+  $pokedex.append(pokemonListView.$element);
+  $pokedex.append($loadMore);
+});
+
+},{"./pokemons":4,"./views/PokemonListView":5,"jquery":7}],2:[function(require,module,exports){
+"use strict";
+
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+var Pokemon = function () {
+  function Pokemon(info) {
+    _classCallCheck(this, Pokemon);
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var $ = require('jquery');
-var Collection = require('../lib/Collection');
-var Pokemon = require('../models/Pokemon');
-
-var PokemonCollection = function (_Collection) {
-  _inherits(PokemonCollection, _Collection);
-
-  function PokemonCollection(items, attrs) {
-    _classCallCheck(this, PokemonCollection);
-
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(PokemonCollection).call(this, items));
-
-    for (var attr in attrs) {
-      _this[attr] = attrs[attr];
-    }
-    return _this;
+    this.name = info.name;
   }
 
-  _createClass(PokemonCollection, [{
+  _createClass(Pokemon, [{
+    key: "getImage",
+    value: function getImage() {
+      return "https://img.pokemondb.net/sprites/black-white/normal/" + this.name + ".png";
+    }
+  }]);
+
+  return Pokemon;
+}();
+
+module.exports = Pokemon;
+
+},{}],3:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var $ = require('jquery');
+var Pokemon = require('./Pokemon');
+
+var PokemonList = function () {
+  function PokemonList(options) {
+    _classCallCheck(this, PokemonList);
+
+    this.items = [];
+    this.nextUrl = options.nextUrl;
+  }
+
+  _createClass(PokemonList, [{
     key: 'fetchNext',
     value: function fetchNext() {
-      var _this2 = this;
+      var _this = this;
 
       return $.get(this.nextUrl).then(function (data) {
-        var newPokemons = new PokemonCollection(data.results, {});
+        var newPokemons = [];
 
-        _this2.items = _this2.items.concat(newPokemons.items);
-        _this2.nextUrl = data.next;
+        for (var i = 0; i < data.results.length; i++) {
+          var pokemon = new Pokemon(data.results[i]);
+
+          newPokemons.push(pokemon);
+        }
+
+        _this.items = _this.items.concat(newPokemons);
+        _this.nextUrl = data.next;
 
         return newPokemons;
       });
     }
   }]);
 
-  return PokemonCollection;
-}(Collection);
+  return PokemonList;
+}();
 
-PokemonCollection.Model = Pokemon;
+module.exports = PokemonList;
 
-module.exports = PokemonCollection;
-
-},{"../lib/Collection":3,"../models/Pokemon":6,"jquery":9}],2:[function(require,module,exports){
+},{"./Pokemon":2,"jquery":7}],4:[function(require,module,exports){
 'use strict';
 
-var $ = require('jquery');
+var PokemonList = require('./models/PokemonList');
 
-var Pokemon = require('./models/Pokemon');
-var PokemonCollection = require('./collections/PokemonCollection');
-var PokemonListView = require('./views/PokemonListView');
-
-var pokemons = new PokemonCollection([], {
+var pokemons = new PokemonList({
   nextUrl: 'https://pokeapi.co/api/v2/pokemon/'
 });
 
-var view = new PokemonListView({
-  pokemons: pokemons,
-  element: $('#pokedex')
-});
+module.exports = pokemons;
 
-view.render().loadMore();
-
-},{"./collections/PokemonCollection":1,"./models/Pokemon":6,"./views/PokemonListView":7,"jquery":9}],3:[function(require,module,exports){
-"use strict";
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Collection = function Collection() {
-  var _this = this;
-
-  var items = arguments.length <= 0 || arguments[0] === undefined ? [] : arguments[0];
-
-  _classCallCheck(this, Collection);
-
-  this.items = items.map(function (item) {
-    return new _this.constructor.Model(item);
-  });
-};
-
-module.exports = Collection;
-
-},{}],4:[function(require,module,exports){
-"use strict";
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Model = function Model(attrs) {
-  _classCallCheck(this, Model);
-
-  for (var attr in attrs) {
-    this[attr] = attrs[attr];
-  }
-};
-
-module.exports = Model;
-
-},{}],5:[function(require,module,exports){
-'use strict';
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var $ = require('jquery');
-
-var View = function View(attrs) {
-  _classCallCheck(this, View);
-
-  if (attrs.element) {
-    this.$element = $(attrs.element);
-  } else {
-    this.$element = $('<div/>');
-  }
-};
-
-module.exports = View;
-
-},{"jquery":9}],6:[function(require,module,exports){
+},{"./models/PokemonList":3}],5:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var Model = require('../lib/Model');
-
-var Pokemon = function (_Model) {
-  _inherits(Pokemon, _Model);
-
-  function Pokemon() {
-    _classCallCheck(this, Pokemon);
-
-    return _possibleConstructorReturn(this, Object.getPrototypeOf(Pokemon).apply(this, arguments));
-  }
-
-  _createClass(Pokemon, [{
-    key: 'getName',
-    value: function getName() {
-      var name = this.name;
-      return '' + name.charAt(0).toUpperCase() + name.slice(1);
-    }
-  }, {
-    key: 'getImage',
-    value: function getImage() {
-      return 'https://img.pokemondb.net/sprites/black-white/normal/' + this.name + '.png';
-    }
-  }]);
-
-  return Pokemon;
-}(Model);
-
-module.exports = Pokemon;
-
-},{"../lib/Model":4}],7:[function(require,module,exports){
-'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
 var $ = require('jquery');
-var View = require('../lib/View');
 var PokemonView = require('./PokemonView');
 
-var PokemonListView = function (_View) {
-  _inherits(PokemonListView, _View);
-
+var PokemonListView = function () {
   function PokemonListView(attrs) {
     _classCallCheck(this, PokemonListView);
 
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(PokemonListView).call(this, attrs));
-
-    _this.pokemons = attrs.pokemons;
-
-    _this.$pokemonsList = $('<div class="pokemon-list"/>');
-    _this.$loadMore = $('<button class="load-more">Load more</button>');
-    return _this;
+    this.pokemonList = attrs.pokemons;
+    this.$element = $('<div/>');
+    this.$element.addClass('pokemon-list');
   }
 
   _createClass(PokemonListView, [{
-    key: 'render',
-    value: function render() {
+    key: 'loadNextPage',
+    value: function loadNextPage() {
+      var _this = this;
+
+      return this.pokemonList.fetchNext().then(function (newPokemons) {
+        _this.appendPokemons(newPokemons);
+      });
+    }
+  }, {
+    key: 'appendPokemons',
+    value: function appendPokemons(pokemons) {
       var _this2 = this;
 
-      this.$element.append(this.$pokemonsList);
-      this.appendPokemonList(this.pokemons);
+      pokemons.forEach(function (pokemon) {
+        var pokemonView = new PokemonView({
+          pokemon: pokemon
+        });
 
-      this.$loadMore.on('click', function () {
-        return _this2.loadMore();
-      });
-      this.$element.append(this.$loadMore);
-
-      return this;
-    }
-  }, {
-    key: 'loadMore',
-    value: function loadMore() {
-      var _this3 = this;
-
-      this.$loadMore.attr('disabled', 'disabled');
-      this.$loadMore.text('Loading...');
-      this.pokemons.fetchNext().then(function (newPokemons) {
-        _this3.appendPokemonList(newPokemons);
-        _this3.$loadMore.removeAttr('disabled');
-        _this3.$loadMore.text('Load more');
+        pokemonView.render();
+        _this2.$element.append(pokemonView.$element);
       });
     }
   }, {
-    key: 'appendPokemonList',
-    value: function appendPokemonList(list) {
-      var _this4 = this;
-
-      list.items.forEach(function (pokemon) {
-        var pokemonView = new PokemonView({ pokemon: pokemon });
-        _this4.$pokemonsList.append(pokemonView.render().$element);
-      });
+    key: 'render',
+    value: function render() {
+      this.appendPokemons(this.pokemonList.items);
     }
   }]);
 
   return PokemonListView;
-}(View);
+}();
 
 module.exports = PokemonListView;
 
-},{"../lib/View":5,"./PokemonView":8,"jquery":9}],8:[function(require,module,exports){
+},{"./PokemonView":6,"jquery":7}],6:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+var $ = require('jquery');
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var View = require('../lib/View');
-
-var PokemonView = function (_View) {
-  _inherits(PokemonView, _View);
-
+var PokemonView = function () {
   function PokemonView(attrs) {
     _classCallCheck(this, PokemonView);
 
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(PokemonView).call(this, attrs));
-
-    _this.pokemon = attrs.pokemon;
-    return _this;
+    this.pokemon = attrs.pokemon;
+    this.$element = $('<div/>');
+    this.$element.addClass('pokemon');
   }
 
   _createClass(PokemonView, [{
     key: 'render',
     value: function render() {
-      var html = '\n      <div class="pokemon">\n        <img class="pokemon-image" src="' + this.pokemon.getImage() + '"/>\n        <div class="pokemon-name">\n          ' + this.pokemon.getName() + '\n        </div>\n      </div>';
+      var url = this.pokemon.getImage();
 
-      this.$element.html(html);
+      var $pokemonImage = $('<img/>');
+      $pokemonImage.addClass('pokemon-image');
+      $pokemonImage.attr('src', url);
 
-      return this;
+      var $pokemonName = $('<div/>');
+      $pokemonName.addClass('pokemon-name');
+      $pokemonName.append(this.pokemon.name);
+
+      this.$element.append($pokemonImage);
+      this.$element.append($pokemonName);
     }
   }]);
 
   return PokemonView;
-}(View);
+}();
 
 module.exports = PokemonView;
 
-},{"../lib/View":5}],9:[function(require,module,exports){
+},{"jquery":7}],7:[function(require,module,exports){
 /*eslint-disable no-unused-vars*/
 /*!
  * jQuery JavaScript Library v3.1.0
@@ -10355,4 +10282,4 @@ if ( !noGlobal ) {
 return jQuery;
 } );
 
-},{}]},{},[2]);
+},{}]},{},[1]);

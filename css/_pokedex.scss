@@ -1,0 +1,16 @@
+.pokedex {
+  height: 100%;
+  width: 100%;
+  background-color: $pokedex-color;
+  padding: 15px;
+  padding-bottom: 40px;
+
+  @media(min-width: $mobile-screen + 1) {
+    height: 400px;
+    width: 350px;
+    border-radius: 5px;
+    box-shadow: 0 10px 0 darken($pokedex-color, 10%);
+    border: 3px solid lighten($pokedex-color, 10%);
+    border-top: none;
+  }
+}
